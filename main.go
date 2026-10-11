@@ -25,6 +25,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("database: %v", err)
 	}
-
 	defer pool.Close()
+
+	if err := database.Migrate(ctx, pool); err != nil {
+		log.Fatalf("database: %v", err)
+	}
+	log.Println("database: migrations applied")
 }
