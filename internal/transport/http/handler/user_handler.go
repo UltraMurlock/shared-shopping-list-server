@@ -20,6 +20,12 @@ func NewUserHandler(log *slog.Logger, userService *service.UserService) *UserHan
 	return &UserHandler{log: log, userService: userService}
 }
 
+// GetMe returns the current user's profile.
+// @Tags        Users
+// @Produce     json
+// @Success  	200 {object} userResponse "User"
+// @Security    BearerAuth
+// @Router      /users/me [get]
 func (h *UserHandler) GetMe(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.UserIDFromContext(r.Context())
 	if !ok {
@@ -36,6 +42,14 @@ func (h *UserHandler) GetMe(w http.ResponseWriter, r *http.Request) {
 	httputils.WriteJSON(w, http.StatusOK, toUserResponse(u))
 }
 
+// UpdateMe updates the current user's profile.
+// @Tags        Users
+// @Accept		json
+// @Produce     json
+// @Param     	request body updateMeRequest true "Patch"
+// @Success     200 {object} userResponse "User"
+// @Security    BearerAuth
+// @Router      /users/me [patch]
 func (h *UserHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.UserIDFromContext(r.Context())
 	if !ok {

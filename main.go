@@ -18,6 +18,11 @@ import (
 	"shared-shopping-list-server/internal/transport/http/handler"
 )
 
+// @Title      		Shared Shopping List API
+// @Version         1.0
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelInfo,

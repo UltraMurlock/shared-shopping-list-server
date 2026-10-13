@@ -19,6 +19,13 @@ func NewAuthHandler(log *slog.Logger, authService *service.AuthService) *AuthHan
 	return &AuthHandler{log: log, authService: authService}
 }
 
+// Login authenticates a user and returns a JWT.
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request body loginRequest true "Credentials"
+// @Success      200 {object} loginResponse
+// @Router       /auth/login [post]
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req loginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
