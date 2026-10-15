@@ -13,6 +13,8 @@ func NewRouter(
 	jwt *auth.JWTManager,
 	authHandler *handler.AuthHandler,
 	userHandler *handler.UserHandler,
+	listHandler *handler.ListHandler,
+	eventHandler *handler.EventHandler,
 ) http.Handler {
 	mux := http.NewServeMux()
 
@@ -21,6 +23,13 @@ func NewRouter(
 	authMW := middleware.Auth(jwt)
 	mux.Handle("GET /users/me", authMW(http.HandlerFunc(userHandler.GetMe)))
 	mux.Handle("PATCH /users/me", authMW(http.HandlerFunc(userHandler.UpdateMe)))
+
+	mux.Handle("GET /lists", authMW(http.HandlerFunc(listHandler.List)))
+	mux.Handle("POST /lists", authMW(http.HandlerFunc(listHandler.Create)))
+	mux.Handle("GET /lists/{list_id}", authMW(http.HandlerFunc(listHandler.GetByID)))
+	mux.Handle("PATCH /lists/{list_id}", authMW(http.HandlerFunc(listHandler.Update)))
+	mux.Handle("DELETE /lists/{list_id}", authMW(http.HandlerFunc(listHandler.Delete)))
+	mux.Handle("GET /lists/{list_id}/events", authMW(http.HandlerFunc(eventHandler.ListForList)))
 
 	var h http.Handler = mux
 	recoveryMW := middleware.Recovery(log)

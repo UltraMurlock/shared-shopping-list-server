@@ -24,16 +24,6 @@ func toUserResponse(u *domain.User) userResponse {
 	}
 }
 
-type loginRequest struct {
-	Login    string `json:"login"`
-	Password string `json:"password"`
-}
-
-type loginResponse struct {
-	Token string       `json:"token"`
-	User  userResponse `json:"user"`
-}
-
 type updateMeRequest struct {
 	DisplayName *string `json:"display_name"`
 }

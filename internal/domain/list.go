@@ -12,6 +12,6 @@ type List struct {
 	Description string
 	Version     int64
 	CreatedAt   time.Time
-	UpdateAt    time.Time
+	UpdatedAt   time.Time
 	DeletedAt   *time.Time
 }

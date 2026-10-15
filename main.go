@@ -56,13 +56,20 @@ func main() {
 	}
 
 	userRepo := repository.NewUserRepo()
+	listRepo := repository.NewListRepo()
+	eventRepo := repository.NewEventRepo()
+
 	userService := service.NewUserService(pool, userRepo)
 	authService := service.NewAuthService(pool, userRepo, jwtManager)
+	listService := service.NewListService(pool, listRepo, eventRepo)
+	eventService := service.NewEventService(pool, listRepo, eventRepo)
 
 	authHandler := handler.NewAuthHandler(logger, authService)
 	userHandler := handler.NewUserHandler(logger, userService)
+	listHandler := handler.NewListHandler(logger, listService)
+	eventHandler := handler.NewEventHandler(logger, eventService)
 
-	router := appHtpp.NewRouter(logger, jwtManager, authHandler, userHandler)
+	router := appHtpp.NewRouter(logger, jwtManager, authHandler, userHandler, listHandler, eventHandler)
 
 	srv := &http.Server{
 		Addr:    ":8080",

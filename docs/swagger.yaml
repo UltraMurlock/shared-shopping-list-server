@@ -1,4 +1,73 @@
 definitions:
+  handler.createListRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  handler.deleteListRequest:
+    properties:
+      version:
+        type: integer
+    type: object
+  handler.eventResponse:
+    properties:
+      actor_id:
+        type: string
+      created_at:
+        type: string
+      entity_id:
+        type: string
+      entity_type:
+        type: string
+      entity_version:
+        type: integer
+      id:
+        type: integer
+      list_id:
+        type: string
+      operation:
+        type: string
+      payload:
+        additionalProperties: {}
+        type: object
+    type: object
+  handler.listCollectionResponse:
+    properties:
+      lists:
+        items:
+          $ref: '#/definitions/handler.listResponse'
+        type: array
+    type: object
+  handler.listEventsResponse:
+    properties:
+      events:
+        items:
+          $ref: '#/definitions/handler.eventResponse'
+        type: array
+      has_more:
+        type: boolean
+    type: object
+  handler.listResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      owner_id:
+        type: string
+      updated_at:
+        type: string
+      version:
+        type: integer
+    type: object
   handler.loginRequest:
     properties:
       login:
@@ -12,6 +81,17 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/handler.userResponse'
+    type: object
+  handler.updateListRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      version:
+        type: integer
+    required:
+    - version
     type: object
   handler.updateMeRequest:
     properties:
@@ -56,6 +136,138 @@ paths:
             $ref: '#/definitions/handler.loginResponse'
       tags:
       - Auth
+  /lists:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lists collection
+          schema:
+            $ref: '#/definitions/handler.listCollectionResponse'
+      security:
+      - BearerAuth: []
+      tags:
+      - Lists
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: New list data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.createListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Created list
+          schema:
+            $ref: '#/definitions/handler.listResponse'
+      security:
+      - BearerAuth: []
+      tags:
+      - Lists
+  /lists/{list_id}:
+    delete:
+      parameters:
+      - description: List ID (UUID)
+        in: path
+        name: list_id
+        required: true
+        type: string
+      - description: List version
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.deleteListRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: List deleted
+      security:
+      - BearerAuth: []
+      tags:
+      - Lists
+    get:
+      parameters:
+      - description: List ID (UUID)
+        in: path
+        name: list_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List
+          schema:
+            $ref: '#/definitions/handler.listResponse'
+      security:
+      - BearerAuth: []
+      tags:
+      - Lists
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: List ID (UUID)
+        in: path
+        name: list_id
+        required: true
+        type: string
+      - description: Patch
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.updateListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated list
+          schema:
+            $ref: '#/definitions/handler.listResponse'
+      security:
+      - BearerAuth: []
+      tags:
+      - Lists
+  /lists/{list_id}/events:
+    get:
+      parameters:
+      - description: List ID (UUID)
+        in: path
+        name: list_id
+        required: true
+        type: string
+      - description: 'Cursor: return event with id > after (0 — from start)'
+        in: query
+        minimum: 0
+        name: after
+        required: true
+        type: integer
+      - description: Max batch size
+        in: query
+        maximum: 500
+        minimum: 1
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Events
+          schema:
+            $ref: '#/definitions/handler.listEventsResponse'
+      security:
+      - BearerAuth: []
+      tags:
+      - Lists
   /users/me:
     get:
       produces:
