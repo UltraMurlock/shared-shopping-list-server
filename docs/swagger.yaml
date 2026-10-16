@@ -1,4 +1,17 @@
 definitions:
+  handler.createListItemRequest:
+    properties:
+      comment:
+        type: string
+      is_done:
+        type: boolean
+      name:
+        type: string
+      quantity:
+        type: number
+      unit_id:
+        type: integer
+    type: object
   handler.createListRequest:
     properties:
       description:
@@ -7,6 +20,11 @@ definitions:
         type: string
     required:
     - name
+    type: object
+  handler.deleteListItemRequest:
+    properties:
+      version:
+        type: integer
     type: object
   handler.deleteListRequest:
     properties:
@@ -50,6 +68,40 @@ definitions:
         type: array
       has_more:
         type: boolean
+    type: object
+  handler.listItemCollectionResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/handler.listItemResponse'
+        type: array
+    type: object
+  handler.listItemResponse:
+    properties:
+      comment:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      id:
+        type: string
+      is_done:
+        type: boolean
+      list_id:
+        type: string
+      name:
+        type: string
+      quantity:
+        type: number
+      unit_id:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: string
+      version:
+        type: integer
     type: object
   handler.listResponse:
     properties:
@@ -95,6 +147,21 @@ definitions:
         type: integer
       name:
         type: string
+    type: object
+  handler.updateListItemRequest:
+    properties:
+      comment:
+        type: string
+      is_done:
+        type: boolean
+      name:
+        type: string
+      quantity:
+        type: number
+      unit_id:
+        type: integer
+      version:
+        type: integer
     type: object
   handler.updateListRequest:
     properties:
@@ -282,6 +349,110 @@ paths:
       - BearerAuth: []
       tags:
       - Lists
+  /lists/{list_id}/items:
+    get:
+      parameters:
+      - description: List ID (UUID)
+        in: path
+        name: list_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List items collection
+          schema:
+            $ref: '#/definitions/handler.listItemCollectionResponse'
+      security:
+      - BearerAuth: []
+      tags:
+      - ListItems
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: List ID (UUID)
+        in: path
+        name: list_id
+        required: true
+        type: string
+      - description: New list item data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.createListItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Created list item
+          schema:
+            $ref: '#/definitions/handler.listItemResponse'
+      security:
+      - BearerAuth: []
+      tags:
+      - ListItems
+  /lists/{list_id}/items/{item_id}:
+    delete:
+      parameters:
+      - description: List ID (UUID)
+        in: path
+        name: list_id
+        required: true
+        type: string
+      - description: Item ID (UUID)
+        in: path
+        name: item_id
+        required: true
+        type: string
+      - description: List item version
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.deleteListItemRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: List item deleted
+      security:
+      - BearerAuth: []
+      tags:
+      - ListItems
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: List ID (UUID)
+        in: path
+        name: list_id
+        required: true
+        type: string
+      - description: Item ID (UUID)
+        in: path
+        name: item_id
+        required: true
+        type: string
+      - description: Patch
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.updateListItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated list item
+          schema:
+            $ref: '#/definitions/handler.listItemResponse'
+      security:
+      - BearerAuth: []
+      tags:
+      - ListItems
   /units:
     get:
       produces:

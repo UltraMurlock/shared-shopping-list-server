@@ -15,6 +15,7 @@ func NewRouter(
 	userHandler *handler.UserHandler,
 	unitHandler *handler.UnitHandler,
 	listHandler *handler.ListHandler,
+	listItemHandler *handler.ListItemHandler,
 	eventHandler *handler.EventHandler,
 ) http.Handler {
 	mux := http.NewServeMux()
@@ -33,6 +34,11 @@ func NewRouter(
 	mux.Handle("PATCH /lists/{list_id}", authMW(http.HandlerFunc(listHandler.Update)))
 	mux.Handle("DELETE /lists/{list_id}", authMW(http.HandlerFunc(listHandler.Delete)))
 	mux.Handle("GET /lists/{list_id}/events", authMW(http.HandlerFunc(eventHandler.ListForList)))
+
+	mux.Handle("GET /lists/{list_id}/items", authMW(http.HandlerFunc(listItemHandler.List)))
+	mux.Handle("POST /lists/{list_id}/items", authMW(http.HandlerFunc(listItemHandler.Create)))
+	mux.Handle("PATCH /lists/{list_id}/items/{item_id}", authMW(http.HandlerFunc(listItemHandler.Update)))
+	mux.Handle("DELETE /lists/{list_id}/items/{item_id}", authMW(http.HandlerFunc(listItemHandler.Delete)))
 
 	var h http.Handler = mux
 	recoveryMW := middleware.Recovery(log)

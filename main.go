@@ -58,21 +58,25 @@ func main() {
 	userRepo := repository.NewUserRepo()
 	unitRepo := repository.NewUnitRepo()
 	listRepo := repository.NewListRepo()
+	listItemRepo := repository.NewListItemRepo()
 	eventRepo := repository.NewEventRepo()
 
 	userService := service.NewUserService(pool, userRepo)
 	authService := service.NewAuthService(pool, userRepo, jwtManager)
 	unitService := service.NewUnitService(pool, unitRepo)
 	listService := service.NewListService(pool, listRepo, eventRepo)
+	listItemService := service.NewListItemService(pool, listRepo, listItemRepo, unitRepo, eventRepo)
 	eventService := service.NewEventService(pool, listRepo, eventRepo)
 
 	authHandler := handler.NewAuthHandler(logger, authService)
 	userHandler := handler.NewUserHandler(logger, userService)
 	unitHandler := handler.NewUnitHandler(logger, unitService)
 	listHandler := handler.NewListHandler(logger, listService)
+	listItemHandler := handler.NewListItemHandler(logger, listItemService)
 	eventHandler := handler.NewEventHandler(logger, eventService)
 
-	router := appHtpp.NewRouter(logger, jwtManager, authHandler, userHandler, unitHandler, listHandler, eventHandler)
+	router := appHtpp.NewRouter(logger, jwtManager, authHandler, userHandler, unitHandler,
+		listHandler, listItemHandler, eventHandler)
 
 	srv := &http.Server{
 		Addr:    ":8080",

@@ -2,9 +2,12 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"shared-shopping-list-server/internal/database"
 	"shared-shopping-list-server/internal/domain"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type UnitRepo struct{}
@@ -48,4 +51,28 @@ func (r *UnitRepo) List(
 	}
 
 	return units, nil
+}
+
+func (r *UnitRepo) GetByID(
+	ctx context.Context,
+	q database.Querier,
+	id int16,
+) (*domain.Unit, error) {
+	const query = `
+		SELECT id, name
+		FROM units
+		WHERE id = $1
+	`
+
+	var l domain.Unit
+	err := q.QueryRow(ctx, query, id).Scan(&l.ID, &l.Name)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, fmt.Errorf("unit repo: get by id: %w", domain.ErrNotFound)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("unit repo: get by id: %w", err)
+	}
+
+	return &l, nil
 }

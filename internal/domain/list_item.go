@@ -18,8 +18,8 @@ type ListItem struct {
 	Version   int64
 	CreatedBy uuid.UUID
 	CreatedAt time.Time
-	UpdateBy  uuid.UUID
-	UpdateAt  time.Time
+	UpdatedBy uuid.UUID
+	UpdatedAt time.Time
 	DeletedBy *uuid.UUID
 	DeletedAt *time.Time
 }
