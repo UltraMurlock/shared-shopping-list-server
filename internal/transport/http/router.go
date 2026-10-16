@@ -13,6 +13,7 @@ func NewRouter(
 	jwt *auth.JWTManager,
 	authHandler *handler.AuthHandler,
 	userHandler *handler.UserHandler,
+	unitHandler *handler.UnitHandler,
 	listHandler *handler.ListHandler,
 	eventHandler *handler.EventHandler,
 ) http.Handler {
@@ -23,6 +24,8 @@ func NewRouter(
 	authMW := middleware.Auth(jwt)
 	mux.Handle("GET /users/me", authMW(http.HandlerFunc(userHandler.GetMe)))
 	mux.Handle("PATCH /users/me", authMW(http.HandlerFunc(userHandler.UpdateMe)))
+
+	mux.Handle("GET /units", authMW(http.HandlerFunc(unitHandler.List)))
 
 	mux.Handle("GET /lists", authMW(http.HandlerFunc(listHandler.List)))
 	mux.Handle("POST /lists", authMW(http.HandlerFunc(listHandler.Create)))

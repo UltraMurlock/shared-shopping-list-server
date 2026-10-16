@@ -82,6 +82,20 @@ definitions:
       user:
         $ref: '#/definitions/handler.userResponse'
     type: object
+  handler.unitCollectionResponse:
+    properties:
+      units:
+        items:
+          $ref: '#/definitions/handler.unitResponse'
+        type: array
+    type: object
+  handler.unitResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   handler.updateListRequest:
     properties:
       description:
@@ -268,6 +282,19 @@ paths:
       - BearerAuth: []
       tags:
       - Lists
+  /units:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Units
+          schema:
+            $ref: '#/definitions/handler.unitCollectionResponse'
+      security:
+      - BearerAuth: []
+      tags:
+      - Units
   /users/me:
     get:
       produces:
