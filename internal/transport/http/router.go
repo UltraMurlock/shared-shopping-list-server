@@ -17,10 +17,13 @@ func NewRouter(
 	listHandler *handler.ListHandler,
 	listItemHandler *handler.ListItemHandler,
 	eventHandler *handler.EventHandler,
+	wsHandler *handler.WSHandler,
 ) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("POST /auth/login", authHandler.Login)
+
+	mux.HandleFunc("GET /ws", wsHandler.Connect)
 
 	authMW := middleware.Auth(jwt)
 	mux.Handle("GET /users/me", authMW(http.HandlerFunc(userHandler.GetMe)))

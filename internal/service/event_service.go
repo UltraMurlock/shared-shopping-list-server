@@ -34,7 +34,7 @@ func (s *EventService) ListForList(
 		return nil, false, fmt.Errorf("event service: list for list: %w", err)
 	}
 
-	events, hasMore, err := s.eventRepo.ListAfter(ctx, s.pool, listID, afterID, limit)
+	events, hasMore, err := s.eventRepo.ListByListAfter(ctx, s.pool, listID, afterID, limit)
 	if err != nil {
 		return nil, false, fmt.Errorf("event service: list for list: %w", err)
 	}

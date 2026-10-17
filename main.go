@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -16,6 +18,7 @@ import (
 	"shared-shopping-list-server/internal/service"
 	appHtpp "shared-shopping-list-server/internal/transport/http"
 	"shared-shopping-list-server/internal/transport/http/handler"
+	"shared-shopping-list-server/internal/transport/ws"
 )
 
 // @Title      		Shared Shopping List API
@@ -75,13 +78,43 @@ func main() {
 	listItemHandler := handler.NewListItemHandler(logger, listItemService)
 	eventHandler := handler.NewEventHandler(logger, eventService)
 
+	hub := ws.NewHub(logger)
+	go hub.Run()
+
+	publisher := ws.NewPublisher(logger, pool, eventRepo, hub)
+
+	pubCtx, pubCancel := context.WithCancel(context.Background())
+	defer pubCancel()
+
+	go func() {
+		if err := publisher.Run(pubCtx); err != nil {
+			logger.Error("publisher", "error", err)
+		}
+	}()
+
+	wsHandler := handler.NewWSHandler(logger, hub, jwtManager)
+
 	router := appHtpp.NewRouter(logger, jwtManager, authHandler, userHandler, unitHandler,
-		listHandler, listItemHandler, eventHandler)
+		listHandler, listItemHandler, eventHandler, wsHandler)
 
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: router,
 	}
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownCancel()
+
+	go func() {
+		sigCh := make(chan os.Signal, 1)
+		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+		<-sigCh
+
+		logger.Info("shutting down")
+		pubCancel()
+		hub.Stop()
+		_ = srv.Shutdown(shutdownCtx)
+	}()
 
 	logger.Info("server starting", "addr", srv.Addr)
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
