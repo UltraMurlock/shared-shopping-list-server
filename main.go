@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -79,14 +81,21 @@ func main() {
 	eventHandler := handler.NewEventHandler(logger, eventService)
 
 	hub := ws.NewHub(logger)
-	go hub.Run()
+	var bg sync.WaitGroup
+
+	bg.Add(1)
+	go func() {
+		defer bg.Done()
+		hub.Run()
+	}()
 
 	publisher := ws.NewPublisher(logger, pool, eventRepo, hub)
-
 	pubCtx, pubCancel := context.WithCancel(context.Background())
 	defer pubCancel()
 
+	bg.Add(1)
 	go func() {
+		defer bg.Done()
 		if err := publisher.Run(pubCtx); err != nil {
 			logger.Error("publisher", "error", err)
 		}
@@ -98,26 +107,45 @@ func main() {
 		listHandler, listItemHandler, eventHandler, wsHandler)
 
 	srv := &http.Server{
-		Addr:    ":8080",
-		Handler: router,
+		Addr:              ":8080",
+		Handler:           router,
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 
-	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer shutdownCancel()
-
+	srvErrCh := make(chan error, 1)
 	go func() {
-		sigCh := make(chan os.Signal, 1)
-		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
-		<-sigCh
-
-		logger.Info("shutting down")
-		pubCancel()
-		hub.Stop()
-		_ = srv.Shutdown(shutdownCtx)
+		logger.Info("server starting", "addr", srv.Addr)
+		srvErrCh <- srv.ListenAndServe()
 	}()
 
-	logger.Info("server starting", "addr", srv.Addr)
-	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("server: %v", err)
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+	defer signal.Stop(sigCh)
+
+	select {
+	case err := <-srvErrCh:
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Error("server stopped unexpectedly", "error", err)
+		}
+	case sig := <-sigCh:
+		logger.Info("signal received", "signal", sig.String())
 	}
+
+	// --- SHUTDOWN ---
+	logger.Info("shutting down")
+
+	pubCancel()
+
+	hub.Stop()
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		logger.Error("http shutdown", "error", err)
+	}
+
+	bg.Wait()
+
+	logger.Info("shutdown complete")
 }
