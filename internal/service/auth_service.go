@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"shared-shopping-list-server/internal/auth"
 	"shared-shopping-list-server/internal/domain"
 	"shared-shopping-list-server/internal/repository"
+	"shared-shopping-list-server/internal/shared/auth"
 	"strings"
 	"time"
 

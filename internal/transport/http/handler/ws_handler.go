@@ -3,7 +3,7 @@ package handler
 import (
 	"log/slog"
 	"net/http"
-	"shared-shopping-list-server/internal/auth"
+	"shared-shopping-list-server/internal/shared/auth"
 	"shared-shopping-list-server/internal/transport/ws"
 
 	"github.com/gorilla/websocket"

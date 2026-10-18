@@ -14,9 +14,9 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"shared-shopping-list-server/internal/auth"
 	"shared-shopping-list-server/internal/repository"
 	"shared-shopping-list-server/internal/service"
+	"shared-shopping-list-server/internal/shared/auth"
 	"shared-shopping-list-server/internal/shared/database"
 	appHtpp "shared-shopping-list-server/internal/transport/http"
 	"shared-shopping-list-server/internal/transport/http/handler"

@@ -3,7 +3,7 @@ package http
 import (
 	"log/slog"
 	"net/http"
-	"shared-shopping-list-server/internal/auth"
+	"shared-shopping-list-server/internal/shared/auth"
 	"shared-shopping-list-server/internal/transport/http/handler"
 	"shared-shopping-list-server/internal/transport/http/middleware"
 )

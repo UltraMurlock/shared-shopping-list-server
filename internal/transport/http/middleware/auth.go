@@ -3,7 +3,7 @@ package middleware
 import (
 	"context"
 	"net/http"
-	"shared-shopping-list-server/internal/auth"
+	"shared-shopping-list-server/internal/shared/auth"
 	"shared-shopping-list-server/internal/transport/http/httputils"
 	"strings"
 	"uuid"

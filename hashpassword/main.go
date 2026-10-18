@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"shared-shopping-list-server/internal/auth"
+	"shared-shopping-list-server/internal/shared/auth"
 )
 
 func main() {
