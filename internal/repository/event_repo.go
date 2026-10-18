@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"shared-shopping-list-server/internal/database"
 	"shared-shopping-list-server/internal/domain"
+	"shared-shopping-list-server/internal/shared/database"
 	"uuid"
 
 	"github.com/jackc/pgx/v5"
