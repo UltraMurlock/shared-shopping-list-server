@@ -20,6 +20,7 @@ import (
 	"shared-shopping-list-server/internal/shared/database"
 	appHtpp "shared-shopping-list-server/internal/transport/http"
 	"shared-shopping-list-server/internal/transport/http/handler"
+	"shared-shopping-list-server/internal/transport/http/middleware"
 	"shared-shopping-list-server/internal/transport/ws"
 )
 
@@ -103,7 +104,9 @@ func main() {
 
 	wsHandler := handler.NewWSHandler(logger, hub, jwtManager)
 
-	router := appHtpp.NewRouter(logger, jwtManager, authHandler, userHandler, unitHandler,
+	corsCfg := middleware.DefaultCORSConfig()
+
+	router := appHtpp.NewRouter(logger, jwtManager, corsCfg, authHandler, userHandler, unitHandler,
 		listHandler, listItemHandler, eventHandler, wsHandler)
 
 	srv := &http.Server{

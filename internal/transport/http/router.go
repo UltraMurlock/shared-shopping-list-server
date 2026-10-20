@@ -11,6 +11,7 @@ import (
 func NewRouter(
 	log *slog.Logger,
 	jwt *auth.JWTManager,
+	corsCfg middleware.CORSConfig,
 	authHandler *handler.AuthHandler,
 	userHandler *handler.UserHandler,
 	unitHandler *handler.UnitHandler,
@@ -44,6 +45,7 @@ func NewRouter(
 	mux.Handle("DELETE /lists/{list_id}/items/{item_id}", authMW(http.HandlerFunc(listItemHandler.Delete)))
 
 	var h http.Handler = mux
-	recoveryMW := middleware.Recovery(log)
-	return recoveryMW(h)
+	h = middleware.Recovery(log)(h)
+	h = middleware.CORS(corsCfg)(h)
+	return h
 }
