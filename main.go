@@ -102,7 +102,7 @@ func main() {
 		}
 	}()
 
-	wsHandler := handler.NewWSHandler(logger, hub, jwtManager)
+	wsHandler := handler.NewWSHandler(logger, hub, jwtManager, listService)
 
 	corsCfg := middleware.DefaultCORSConfig()
 

@@ -15,7 +15,7 @@ import (
 
 const (
 	publisherBatchSize = 100
-	publisherInterval  = time.Second
+	publisherInterval  = 250 * time.Millisecond
 )
 
 type Publisher struct {
@@ -95,6 +95,17 @@ func (p *Publisher) poll(ctx context.Context) error {
 			}
 
 			p.hub.Broadcast(e.ListID, payload)
+
+			// TODO: После добавления совместных списков эта логика должна быть переработана
+			if e.EntityType == domain.EntityTypeList {
+				switch e.Operation {
+				case domain.OperationCreated:
+					p.hub.RegisterListForUser(e.ActorID, e.ListID)
+				case domain.OperationDeleted:
+					p.hub.UnregisterListForUser(e.ActorID, e.ListID)
+				}
+			}
+
 			p.lastEventID = e.ID
 		}
 

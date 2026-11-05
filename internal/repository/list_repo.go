@@ -62,6 +62,38 @@ func (r *ListRepo) ListActive(
 	return lists, nil
 }
 
+func (r *ListRepo) ListIDsByOwner(
+	ctx context.Context,
+	q database.Querier,
+	ownerID uuid.UUID,
+) ([]uuid.UUID, error) {
+	const query = `
+		SELECT id
+		FROM lists
+		WHERE owner_id = $1 AND deleted_at IS NULL
+	`
+
+	rows, err := q.Query(ctx, query, ownerID)
+	if err != nil {
+		return nil, fmt.Errorf("list repo: list ids by owner: %w", err)
+	}
+	defer rows.Close()
+
+	ids := make([]uuid.UUID, 0)
+	for rows.Next() {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
+			return nil, fmt.Errorf("list repo: list ids by owner: scan: %w", err)
+		}
+		ids = append(ids, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("list repo: list ids by owner: rows: %w", err)
+	}
+
+	return ids, nil
+}
+
 func (r *ListRepo) GetByID(
 	ctx context.Context,
 	q database.Querier,

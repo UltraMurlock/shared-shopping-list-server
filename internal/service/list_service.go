@@ -57,6 +57,15 @@ func (s *ListService) List(ctx context.Context) ([]domain.List, error) {
 	return lists, nil
 }
 
+func (s *ListService) GetUserListIDs(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
+	ids, err := s.listRepo.ListIDsByOwner(ctx, s.pool, userID)
+	if err != nil {
+		return nil, fmt.Errorf("list service: get user list ids: %w", err)
+	}
+
+	return ids, nil
+}
+
 func (s *ListService) GetByID(ctx context.Context, id uuid.UUID) (*domain.List, error) {
 	l, err := s.listRepo.GetByID(ctx, s.pool, id)
 	if err != nil {
